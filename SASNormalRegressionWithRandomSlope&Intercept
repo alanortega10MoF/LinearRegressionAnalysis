@@ -1,0 +1,48 @@
+DATA won;
+INPUT ID Yrs Status$ B2015 B2016 B2017;
+DATALINES;
+1 16 full 1482 1508 1543
+2 7 part 673 710 895
+3 11 full 933 1351 1440
+4 8 part 844 958 1196
+5 6 part 564 790 815
+6 5 full 601 708 780
+7 6 part 775 822 902
+8 17 full 1209 1297 1475
+9 12 full 929 1008 1255
+10 9 full 983 1013 1111
+11 11 full 909 1004 1084
+12 6 part 387 853 999
+13 4 part 476 530 627
+14 6 full 780 843 925
+15 10 full 717 1200 1399
+;
+RUN;
+
+*normalize;
+
+*make longform data;
+DATA long;
+SET won;
+ARRAY b[3] B2015 B2016 B2017;
+ARRAY y[3] (15 16 17);
+DO i = 1 to 3;
+	Year = y[i];
+	Bonus = b[i]/1000;
+	Status = Status;
+	OUTPUT;
+KEEP ID Yrs Status Year Bonus;
+END;
+
+*test for normality;
+PROC UNIVARIATE DATA= long;
+VAR Bonus;
+HISTOGRAM Bonus/NORMAL;
+RUN;
+
+*fit the model;
+PROC MIXED COVTEST;
+CLASS Status;
+MODEL Bonus= Yrs Status Year/solution;
+RANDOM intercept Year/SUBJECT=ID TYPE=un;
+RUN;
