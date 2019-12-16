@@ -1,0 +1,73 @@
+PROC FORMAT;
+VALUE Status$ sts_fmt 
+'1notadmit'='notadmit'
+'2border'='border'
+'3admit' ='admit';
+RUN;
+
+DATA one;
+LENGTH Status $9.0;
+INPUT GPA GMAT Status$;
+DATALINES;
+2.96 596 admit 
+2.8 444 border
+3.14 473 admit 
+3.13 416 border
+3.22 482 admit 
+2.89 431 border
+3.29 527 admit 
+3.01 471 border
+3.69 505 admit 
+2.91 446 border
+2.46 693 admit 
+2.75 546 border
+3.03 626 admit 
+2.73 467 border
+3.19 663 admit 
+3.12 463 border
+3.63 447 admit 
+3.08 440 notadmit
+3.59 588 admit 
+3.01 453 notadmit
+3.3 563 admit 
+3.03 414 notadmit
+3.78 591 admit 
+3.04 446 notadmit
+3.44 692 admit 
+2.89 485 notadmit
+3.48 528 admit 
+2.79 490 notadmit
+3.47 552 admit 
+2.54 446 notadmit
+3.35 520 admit 
+2.43 425 notadmit
+2.89 543 admit 
+2.2 474 notadmit
+2.28 523 admit 
+3.36 531 notadmit
+3.21 530 admit 
+2.57 542 notadmit
+3.58 564 admit 
+2.36 482 notadmit
+3.33 565 admit 
+3.66 420 notadmit
+;
+RUN;
+
+*fit the null model with no predictors;
+PROC GENMOD DATA= one DESCENDING;
+MODEL Status = /DIST= multinomial LINK= cumprobit;
+RUN;
+
+*fit the full model with all predictors;
+PROC GENMOD DATA= one DESCENDING;
+MODEL Status = GPA GMAT /DIST= multinomial LINK= cumprobit;
+RUN;
+
+DATA dev_one;
+deviance=-2*((-43.0673)-(-27.5930));
+pvalue=1-probchi(deviance,2);
+RUN;
+
+PROC PRINT DATA= dev_one;
+RUN;
