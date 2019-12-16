@@ -1,0 +1,42 @@
+*input data;
+DATA three;
+INPUT Age Gender$ Job$ Allowance @@;
+DATALINES;
+15 M yes 0 15 M no 0
+18 F yes 3 15 M no 12
+18 M yes 3 18 M no 3
+14 F no 6 15 M no 4
+16 F yes 2 18 M yes 0
+17 F yes 1 15 F no 8
+18 F yes 1 15 M no 5
+15 F no 4 15 M no 5
+16 M yes 1 14 M no 4
+16 F no 9 16 F yes 3
+16 M no 3 17 M no 2
+16 M no 10 18 M yes 2
+16 F yes 0 17 F yes 11
+14 M no 9 15 M no 6
+17 M yes 1 16 M no 12
+;
+RUN;
+
+*normalize;
+
+*fit the null model;
+PROC GENMOD DATA= three;
+MODEL Allowance = /DIST= negbin;
+RUN;
+
+*fit the full model with all predictors;
+PROC GENMOD DATA= three;
+CLASS Gender (ref = 'F') Job (ref = 'yes');
+MODEL Allowance = Gender Age Job /DIST= negbin;
+RUN;
+
+DATA dev1;
+dev = -2*(-76.2764 + 70.3401);
+pval = 1 - probchi(dev, 5);
+RUN;
+
+PROC PRINT DATA= dev1;
+RUN;
