@@ -1,0 +1,51 @@
+*input data;
+DATA ate;
+INPUT Past5 Prev5 Age Gender$ @@;
+DATALINES;
+1 1 39 M 8 3 69 F
+1 2 56 M 0 2 70 M
+7 0 56 M 7 2 70 M
+3 4 43 F 3 1 54 F
+4 1 42 F 2 1 38 M
+4 2 52 M 3 1 50 F
+0 0 39 F 0 1 62 M
+4 6 68 M 8 2 54 M
+6 1 41 F 0 0 59 M
+0 1 54 F 0 1 61 F
+4 2 50 F 0 0 69 F
+6 4 57 M 8 3 57 F
+5 4 47 F 0 0 57 M
+1 2 43 M 8 5 72 F
+1 1 36 M 0 2 42 M
+1 2 55 F 5 2 42 F
+5 5 57 F 7 2 66 M
+8 5 53 M 7 4 53 M
+0 1 72 M 6 0 52 M
+0 1 67 F 3 7 57 F
+;
+RUN;
+
+*normalize;
+
+*fit the null model with no predictors;
+PROC FMM DATA= ate;
+MODEL Past5 = /DIST=truncnegbin;
+MODEL+/DIST= constant;
+PROBMODEL;
+RUN;
+
+*fit the full model with all predictors;
+PROC FMM DATA= ate;
+CLASS Gender;
+MODEL Past5 = Age Gender/DIST=truncnegbin;
+MODEL+/DIST= constant;
+PROBMODEL Prev5;
+RUN;
+
+DATA dev;
+dev = 2*(90.0607 - 79.2818);
+pval = 1 - probchi(dev, 4);
+RUN;
+
+PROC PRINT DATA= dev;
+RUN;
