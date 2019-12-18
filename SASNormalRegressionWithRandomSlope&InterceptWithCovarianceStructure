@@ -39,6 +39,11 @@ DATALINES;
 ;
 RUN;
 
+%LET response = Score;
+%LET predictors =Age Gender Doctor Length Visit;
+%LET time= Visit;
+%LET obs= ID;
+
 *make longform;
 DATA BackDoor;
 SET tenkuushou;
@@ -46,8 +51,8 @@ ARRAY L[3] Len1 Len2 Len3;
 ARRAY S[3] S1 S2 S3;
 DO i = 1 to 3;
 	Length = L[i];
-	Score = S[i];
-	Visit = i;
+	&response = S[i];
+	&time = i;
 	OUTPUT;
 KEEP ID Age Gender Doctor Length Score Visit;
 END;
@@ -60,9 +65,38 @@ END;
 *Spatial Power:       REPEATED / SUBJECT=ID TYPE= sp(pow) (TimeVariableName) R;
 *Autoregressive:      REPEATED / SUBJECT=ID TYPE= ar(1) R;
 *Compound Symmertric: REPEATED / SUBJECT=ID TYPE= cs R;
+
 PROC MIXED COVTEST DATA= BackDoor;
 CLASS Gender Doctor;
-MODEL Score= Age Gender Doctor Length Visit/solution;
-RANDOM intercept Visit/SUBJECT=ID TYPE=un;
-REPEATED / SUBJECT=ID TYPE=un R;
+MODEL &response= &predictors/solution;
+RANDOM intercept &time/SUBJECT=&obs TYPE=un;
+REPEATED / SUBJECT=&obs TYPE=un R;
+RUN;
+
+PROC MIXED COVTEST DATA= BackDoor;
+CLASS Gender Doctor;
+MODEL &response= &predictors/solution;
+RANDOM intercept &time/SUBJECT=&obs TYPE=un;
+REPEATED / SUBJECT=&obs TYPE=toep R;
+RUN;
+
+PROC MIXED COVTEST DATA= BackDoor;
+CLASS Gender Doctor;
+MODEL &response= &predictors/solution;
+RANDOM intercept &time/SUBJECT=&obs TYPE=un;
+REPEATED / SUBJECT=&obs TYPE=sp(pow) (&time) R;
+RUN;
+
+PROC MIXED COVTEST DATA= BackDoor;
+CLASS Gender Doctor;
+MODEL &response= &predictors/solution;
+RANDOM intercept &time/SUBJECT=&obs TYPE=un;
+REPEATED / SUBJECT=&obs TYPE=ar(1) R;
+RUN;
+
+PROC MIXED COVTEST DATA= BackDoor;
+CLASS Gender Doctor;
+MODEL &response= &predictors/solution;
+RANDOM intercept &time/SUBJECT=&obs TYPE=un;
+REPEATED / SUBJECT=&obs TYPE=cs R;
 RUN;
