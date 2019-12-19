@@ -37,6 +37,8 @@ SET seben;
 Survival = Survived / Planted;
 RUN;
 
+%LET response= Survival;
+
 *fit the null model;
 *betas predict one;
 *gammas predict the non-one part;
@@ -45,35 +47,34 @@ PARMS
 b0=0.1 g0=0.1 phi=0.1;
 pi1 = exp(b0) / (1 + exp(b0));
 mu = exp(g0) / (1 + exp(g0));
-IF (Survival = 1)
+IF (&response = 1)
 THEN loglikelihood = log(pi1);
 ELSE loglikelihood = log(1-pi1) + lgamma(phi) - lgamma(mu*phi)
-- lgamma((1-mu)*phi) + (mu*phi-1)*log(Survival)
-+ ((1-mu)*phi-1)*log(1-Survival);
-MODEL Survival ∼ GENERAL(loglikelihood);
+- lgamma((1-mu)*phi) + (mu*phi-1)*log(&response)
++ ((1-mu)*phi-1)*log(1-&response);
+MODEL &response ∼ GENERAL(loglikelihood);
 RUN;
 
 *fit the full model with all predictors;
 *betas predict one, choosing precip and windspeed;
-*gammas predict the non-one part, choosing ;
+*gammas predict the non-one part, choosing the rest;
 PROC NLMIXED DATA= seben;
-PARMS 
+PARMS
 b0=0.1 b1=0.1 b2=0.1
 g0=0.1 g1=0.1 g2=0.1
 phi=0.1;
 pi1 = exp(b0 + b1*Precip + b2*WindSpeed) / (1 + exp(b0 + b1*Precip + b2*WindSpeed));
 mu = exp(g0 + g1*PestControl + g2*Fertil) / (1 + exp(g0 + g1*PestControl + g2*Fertil));
-IF (Survival = 1) 
+IF (&response = 1) 
 THEN loglikelihood = log(pi1);
 ELSE loglikelihood = log(1-pi1) + lgamma(phi) - lgamma(mu*phi)
-- lgamma((1-mu)*phi) + (mu*phi-1)*log(Survival)
-+ ((1-mu)*phi-1)*log(1-Survival);
-MODEL Survival ∼ GENERAL(loglikelihood);
+- lgamma((1-mu)*phi) + (mu*phi-1)*log(&response)
++ ((1-mu)*phi-1)*log(1-&response);
+MODEL &response ∼ GENERAL(loglikelihood);
 RUN;
 
 DATA dev;
 deviance = 22.2 - 6.9;
 pval = 1 - probchi(deviance, 4);
 RUN;
-PROC PRINT DATA= dev;
-RUN;
+PROC PRINT DATA= dev; RUN;
