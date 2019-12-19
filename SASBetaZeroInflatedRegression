@@ -28,6 +28,8 @@ Price = Price / 100;
 Houses = Houses / 100;
 RUN;
 
+%LET response= Percent;
+
 *fit the null model;
 *betas predict zero;
 *gammas predict the non-zero part;
@@ -39,9 +41,9 @@ mu = exp(g0) / (1 + exp(g0));
 IF (Percent = 0)
 THEN loglikelihood = log(pi0);
 ELSE loglikelihood = log(1-pi0) + lgamma(phi) - lgamma(mu*phi)
-- lgamma((1-mu)*phi) + (mu*phi-1)*log(Percent)
-+ ((1-mu)*phi-1)*log(1-Percent);
-MODEL Percent ∼ GENERAL(loglikelihood);
+- lgamma((1-mu)*phi) + (mu*phi-1)*log(&response)
++ ((1-mu)*phi-1)*log(1-&response);
+MODEL &response ∼ GENERAL(loglikelihood);
 RUN;
 
 *fit the full model with all predictors;
@@ -54,17 +56,17 @@ g0=0.1 g1=0.1 g2=0.1
 phi=0.1;
 pi0 = exp(b0 + b1*age) / (1 + exp(b0 + b1*age));
 mu = exp(g0 + g1*price + g2*houses) / (1 + exp(g0 + g1*price + g2*houses));
-IF (Percent = 0) 
+IF (&response = 0) 
 THEN loglikelihood = log(pi0);
 ELSE loglikelihood = log(1-pi0) + lgamma(phi) - lgamma(mu*phi)
-- lgamma((1-mu)*phi) + (mu*phi-1)*log(Percent)
-+ ((1-mu)*phi-1)*log(1-Percent);
-MODEL Percent ∼ GENERAL(loglikelihood);
+- lgamma((1-mu)*phi) + (mu*phi-1)*log(&response)
++ ((1-mu)*phi-1)*log(1-&response);
+MODEL &response ∼ GENERAL(loglikelihood);
 RUN;
 
+*deviance test;
 DATA dev;
 deviance = 25.2 - 11.1;
 pval = 1 - probchi(deviance, 5);
 RUN;
-
 PROC PRINT DATA= dev; RUN;
