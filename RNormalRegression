@@ -1,0 +1,17 @@
+install.packages(rcompanion)
+library(rcompanion)
+
+#read data
+Ex.data<- read.csv(file="path", header=TRUE, sep=",")
+
+#testing normality
+plotNormalHistogram(Ex.data$sleephours)
+shapiro.test(Ex.data$sleephours)
+
+#fitting model
+summary(fitted.model<- glm(sleephours ~ age + gender + quiettime + nchildren + stress + jobstatus + nactivites + monthslastvac, data=Ex.data, family=gaussian(link=identity)))
+
+#checking model fit
+intercept.only.model<- glm(sleephours ~ 1, data=Ex.data, family=gaussian(link=identity))
+print(deviance<- -2*(logLik(intercept.only.model) - logLik(fitted.model)))
+print(p.value<- pchisq(deviance, df=11, lower.tail=FALSE))
