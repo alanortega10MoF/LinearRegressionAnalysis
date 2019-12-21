@@ -9,6 +9,6 @@ summary(fitted.model<- glm(response ~ gender + age + medication, data=Ex.data, f
 sigma(fitted.model)
 
 #checking model fit
-intercept.only.model<- glm(response ~ 1, data=Ex.data, family=binomial(link=logit))
+intercept.only.model<- glm(response ~ 1, data=Ex.data, family=binomial(link=probit))
 print(deviance<- -2*(logLik(intercept.only.model) - logLik(fitted.model)))
 print(p.value<- pchisq(deviance, df=5, lower.tail=FALSE))
