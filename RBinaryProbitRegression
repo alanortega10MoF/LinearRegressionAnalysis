@@ -5,10 +5,10 @@ library(rcompanion)
 Ex.data<- read.csv(file="path", header=TRUE, sep=",")
 
 #fitting model
-summary(fitted.model<- glm(response ~ gender + age + medication, data=Ex.data, family=binomial(link=probit)))
+summary(fitted.model<- glm(response ~ gender + age + medication, data=Ex.data, family=binomial(link="probit")))
 sigma(fitted.model)
 
 #checking model fit
-intercept.only.model<- glm(response ~ 1, data=Ex.data, family=binomial(link=probit))
+intercept.only.model<- glm(response ~ 1, data=Ex.data, family=binomial(link="probit"))
 print(deviance<- -2*(logLik(intercept.only.model) - logLik(fitted.model)))
 print(p.value<- pchisq(deviance, df=5, lower.tail=FALSE))
