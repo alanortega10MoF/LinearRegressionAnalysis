@@ -13,11 +13,11 @@ n<- 42
 Ex.data<- transform(Ex.data, GMT=GMAT/10)
 
 #fitting model
-summary(fitted.model<- clm(status ~ GMT + GPA, data=Ex.data, link=logit))
+summary(fitted.model<- clm(status ~ GMT + GPA, data=Ex.data, link="logit"))
 print(AICC<- -2*logLik(fitted.model)+2*p*n/(n-p-1))
 BIC(fitted.model)
 
 #checking model fit
-intercept.only.model<- clm(status ~ 1, data=Ex.data, link=logit)
+intercept.only.model<- clm(status ~ 1, data=Ex.data, link="logit")
 print(deviance<- -2*(logLik(intercept.only.model) - logLik(fitted.model)))
 print(p.value<- pchisq(deviance, df=5, lower.tail=FALSE))
