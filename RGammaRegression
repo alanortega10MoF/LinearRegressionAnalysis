@@ -1,0 +1,21 @@
+install.packages(rcompanion)
+library(rcompanion)
+
+#read data
+Ex.data<- read.csv(file="path", header=TRUE, sep=",")
+
+#create new variable
+Ex.data<- transform(Ex.data, ch= preBMI - postBMI)
+
+#testing normality
+plotNormalHistogram(Ex.data$ch)
+shapiro.test(Ex.data$ch)
+
+#fitting model
+summary(fitted.model<- glm(ch ~ gender + age + group, data=Ex.data, family=Gamma(link=log)))
+sigma(fitted.model)
+
+#checking model fit
+intercept.only.model<- glm(ch ~ 1, data=Ex.data, family=Gamma(link=log))
+print(deviance<- -2*(logLik(intercept.only.model) - logLik(fitted.model)))
+print(p.value<- pchisq(deviance, df=5, lower.tail=FALSE))
