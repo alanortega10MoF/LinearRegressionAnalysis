@@ -1,0 +1,14 @@
+install.packages(rcompanion)
+library(rcompanion)
+
+#read data
+Ex.data<- read.csv(file="path", header=TRUE, sep=",")
+
+#fitting model
+summary(fitted.model<- glm(response ~ gender + age + medication, data=Ex.data, family=binomial(link=logit)))
+sigma(fitted.model)
+
+#checking model fit
+intercept.only.model<- glm(response ~ 1, data=Ex.data, family=binomial(link=logit))
+print(deviance<- -2*(logLik(intercept.only.model) - logLik(fitted.model)))
+print(p.value<- pchisq(deviance, df=5, lower.tail=FALSE))
