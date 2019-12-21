@@ -6,12 +6,6 @@ library(nnet)
 #read data
 Ex.data<- read.csv(file="path", header=TRUE, sep=",")
 
-p<- 6
-n<- 42
-
-#new variable
-Ex.data<- transform(Ex.data, GMT=GMAT/10)
-
 #fitting model
 summary(fitted.model<- multinom(outcome ~ elevation + wind_dir + wind_speed + near_water, data=Ex.data))
 
