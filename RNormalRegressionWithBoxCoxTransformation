@@ -1,0 +1,46 @@
+install.packages(rcompanion)
+library(rcompanion)
+install.packages(MASS)
+library(MASS)
+
+#read data
+Ex.data<- read.csv(file="path", header=TRUE, sep=",")
+
+#create new variable
+Ex.data<- transform(Ex.data, ch= preBMI - postBMI)
+
+#testing normality
+plotNormalHistogram(Ex.data$ch)
+shapiro.test(Ex.data$ch)
+
+#find lambda
+BoxCox.fit<- boxcox(ch ~ gender + age + group, data=Ex.data, lambda=seq(-3,3,1/4), interp=FALSE)
+BoxCox.data<- data.frame(BoxCox.fit$x, BoxCox.fit$y)
+ordered.data<- BoxCox.data[with(BoxCox.data, order(-BoxCox.fit.y)),]
+ordered.data[1,]
+
+#transform
+#if lambda = 0, then transform to ln(response)
+#else transform to (response^lambda -1)/lambda
+#interval    use lambda
+#[-2.5, -1.5)    -2
+#[-1.5, -.75)    -1
+#[-.75, -.25)    -.5
+#[-.25, +.25)    0
+#[+.25, +.75)    +.5
+#[+.75, +1.5)    +1
+#[+1.5, +2.5)    +2
+tr.response<- log(Ex.data$ch)
+
+#test normality
+plotNormalHistogram(tr.response)
+Shapiro.test(tr.response)
+
+#fitting model
+summary(fitted.model<- glm(tr.response ~ gender + age + group, data=Ex.data, family=gaussian(link=identity)))
+sigma(fitted.model)
+
+#checking model fit
+intercept.only.model<- glm(tr.response ~ 1, data=Ex.data, family=gaussian(link=identity))
+print(deviance<- -2*(logLik(intercept.only.model) - logLik(fitted.model)))
+print(p.value<- pchisq(deviance, df=5, lower.tail=FALSE))
