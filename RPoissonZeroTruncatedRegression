@@ -1,0 +1,18 @@
+install.packages("rcompanion")
+library(rcompanion)
+install.packages("VGAM")
+library(VGAM)
+
+#read data
+Ex.data<- read.csv(file="path", header=TRUE, sep=",")
+
+#eliminating zeros
+Ex.data<- Ex.data[which(Ex.data$accidents!=0),]
+
+#fitting model
+summary(fitted.model<- vglm(accidents ~ gender + age + miles, data=Ex.data, family=pospoisson()))
+
+#checking model fit
+intercept.only.model<- vglm(accidents ~ 1, data=Ex.data, family=pospoisson())
+print(deviance<- -2*(logLik(intercept.only.model) - logLik(fitted.model)))
+print(p.value<- pchisq(deviance, df=3, lower.tail=FALSE))
