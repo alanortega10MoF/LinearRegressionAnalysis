@@ -1,0 +1,15 @@
+install.packages("rcompanion")
+library(rcompanion)
+install.packages("pscl")
+library(pscl)
+
+#read data
+Ex.data<- read.csv(file="path", header=TRUE, sep=",")
+
+#fitting model
+summary(fitted.model<- hurdle(comps ~ books + jrnls|budget, data=Ex.data, dist="poisson", zero.dist="binomial", link="logit"))
+
+#checking model fit
+intercept.only.model<- hurdle(comps ~ 1, data=Ex.data, dist="poisson", zero.dist="binomial", link="logit")
+print(deviance<- -2*(logLik(intercept.only.model) - logLik(fitted.model)))
+print(p.value<- pchisq(deviance, df=2, lower.tail=FALSE))
