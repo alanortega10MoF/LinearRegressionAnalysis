@@ -1,0 +1,15 @@
+install.packages("rcompanion")
+library(rcompanion)
+install.packages("gamlss")
+library(gamlss)
+
+#read data
+Ex.data<- read.csv(file="path", header=TRUE, sep=",")
+
+#fitting zero-inflated beta regression model
+summary(fitted.model<- gamlss(germrate ~ altitude, mu.link="logit", nu.formula=~ EC, nu.link="log", tau.formula=~ soiltemp, tau.link="log", data=Exercise.data, family=BEINF))
+
+#checking model fit
+intercept.only.model<- gamlss(germrate ~ 1, mu.link="logit", nu.formula=~ 1, nu.link="log", tau.formula=~ 1, tau.link="log", data=Exercise.data, family=BEINF)
+print(deviance<- -2*(logLik(intercept.only.model) -logLik(fitted.model)))
+print(p.value<- pchisq(deviance, df=3, lower.tail=FALSE))
