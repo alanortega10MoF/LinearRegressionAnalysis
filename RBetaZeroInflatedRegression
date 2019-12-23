@@ -1,0 +1,18 @@
+install.packages("rcompanion")
+library(rcompanion)
+install.packages("gamlss")
+library(gamlss)
+
+#read data
+Ex.data<- read.csv(file="path", header=TRUE, sep=",")
+
+Ex.data<- transform(Ex.data, nh = nhouses/100)
+Ex.data<- transform(Ex.data, psold = percsold/100)
+
+#fitting model
+summary(fitted.model<- gamlss(psold ~ price + nh, data=Ex.data, mu.link="logit", nu.formula=~ age, nu.link="logit", family=BEZI))
+
+#checking model fit
+intercept.only.model<- gamlss(psold ~ 1, data=Ex.data, mu.link="logit", nu.formula=~ 1, nu.link="logit", family=BEZI)
+print(deviance<- -2*(logLik(intercept.only.model) - logLik(fitted.model)))
+print(p.value<- pchisq(deviance, df=5, lower.tail=FALSE))
