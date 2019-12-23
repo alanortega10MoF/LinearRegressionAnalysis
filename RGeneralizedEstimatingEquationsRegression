@@ -1,0 +1,48 @@
+install.packages("rcompanion")
+library(rcompanion)
+install.packages("reshape2")
+library(reshape2)
+install.packages("geepack")
+library(geepack)
+install.package("MuMIn")
+library(MuMIn)
+
+#read data
+Ex.data<- read.csv(file="path", header=TRUE, sep=",")
+
+#make longform
+data1<- melt(Ex.data[,c("id", "gender", "age", "doctor", "length1", "length2", length3)], id.vars=c("id", "gender", "age", "doctor"), variable.name="length.level", value.name="length")
+data2<- melt(Ex.data[,c("score1", "score2", "score3")], variable.name="score.level", value.name="score")
+lf.data<- cbind(data1, data2)
+
+time<- ifelse(lf.data$length.level=="length1", 1
+ifelse(lf.data$length.level=="length2", 2
+ifelse(lf.data$length.level=="length3", 3, 0)))
+
+lf.data<- lf.data[order(lf.data$id)]
+
+#verify normality
+plotNormalHistogram(lf.data$score)
+shapiro.test(lf.data$score)
+
+#family= gaussian(link="identity")
+#family= Gamma(link="log")
+#family= poisson(link="log")
+#family= nb(link="log")
+#family= binomial(link="logit")
+
+#fitting unstructured
+summary(fitted.model<- geeglm(score ~ age + gender + doctor + length + time, id=id, data=lf.data, family=gaussian(link="identity"), correlation= "unstructured"))
+QIC(fitted.model)
+
+#fitting independence
+summary(fitted.model<- geeglm(score ~ age + gender + doctor + length + time, id=id, data=lf.data, family=gaussian(link="identity"), correlation= "independence"))
+QIC(fitted.model)
+
+#fitting autoregressive
+summary(fitted.model<- lme(score ~ age + gender + doctor + length + time, id=id, data=lf.data, family=gaussian(link="identity"), correlation= "ar1"))
+QIC(fitted.model)
+
+#fitting exchangeable
+summary(fitted.model<- lme(score ~ age + gender + doctor + length + time, id=id, data=lf.data, family=gaussian(link="identity"), correlation= "exchangeable"))
+QIC(fitted.model)
