@@ -1,0 +1,15 @@
+install.packages("rcompanion")
+library(rcompanion)
+install.packages("MASS")
+library(MASS)
+
+#read data
+Ex.data<- read.csv(file="path", header=TRUE, sep=",")
+
+#fitting model
+summary(fitted.model<- glm.nb(n_dead_mussels ~ min_temp + max_temp + feeding_level, data=Ex.data))
+
+#checking model fit
+intercept.only.model<- glm.nb(n_dead_mussels ~ 1, data=Ex.data)
+print(deviance<- -2*(logLik(intercept.only.model) - logLik(fitted.model)))
+print(p.value<- pchisq(deviance, df=3, lower.tail=FALSE))
