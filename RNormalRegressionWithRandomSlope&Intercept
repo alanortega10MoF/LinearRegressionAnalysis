@@ -1,0 +1,31 @@
+install.packages("rcompanion")
+library(rcompanion)
+install.packages("reshape2")
+library(reshape2)
+install.packages("nlme")
+library(nlme)
+
+#read data
+Ex.data<- read.csv(file="path", header=TRUE, sep=",")
+
+#make longform
+lf.data<- melt(Ex.data, id.vars=c("id", "totalyears", "status"), variable.name="bonusyear", value.name="bonus")
+year<- ifelse(lf.data$bonusyear=="bonus15", 15
+ifelse(lf.data$bonusyear=="bonus16", 16
+ifelse(lf.data$bonusyear=="bonus17", 17, 0)))
+
+#verify normality
+plotNormalHistogram(lf.data$bonus)
+shapiro.test(lf.data$bonus)
+
+#fitting model
+summary(fitted.model<- lme(bonus ~ totalyears + status + year, random=~1 + year|id, data=Ex.data))
+intervals(fitted.model)
+n<- 45
+p<- 6
+print(AICC<- -2*logLik(fitted.model)+2*p*n/(n-p-1))
+
+#checking model fit
+intercept.only.model<- glm(bonus ~ totalyears + status + year, data=Ex.data)
+print(deviance<- -2*(logLik(intercept.only.model) -logLik(fitted.model)))
+print(p.value<- pchisq(deviance, df=3, lower.tail=FALSE))
