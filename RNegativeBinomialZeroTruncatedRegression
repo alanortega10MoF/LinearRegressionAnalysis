@@ -1,0 +1,15 @@
+install.packages("rcompanion")
+library(rcompanion)
+install.packages("vglm")
+library(vglm)
+
+#read data
+Ex.data<- read.csv(file="path", header=TRUE, sep=",")
+
+#fitting model
+summary(fitted.model<- vglm(nnewvideos ~ nvideos + nsubscr + nviews + type, data=Ex.data, family=posnegbinomial()))
+
+#checking model fit
+intercept.only.model<- vglm(nnewvideos ~ 1, data=Ex.data, family=posnegbinomial())
+print(deviance<- -2*(logLik(intercept.only.model) - logLik(fitted.model)))
+print(p.value<- pchisq(deviance, df=9, lower.tail=FALSE))
