@@ -1,0 +1,20 @@
+install.packages("rcompanion")
+library(rcompanion)
+install.packages("betareg")
+library(betareg)
+
+#read data
+Ex.data<- read.csv(file="path", header=TRUE, sep=",")
+
+Ex.data<- transform(Ex.data, mass = mass/1000)
+Ex.data<- transform(Ex.data, wingspan = wingspan/100)
+Ex.data<- transform(Ex.data, distance = distance/1000)
+Ex.data<- transform(Ex.data, prop = nmigrated/nringed)
+
+#fitting model
+summary(fitted.model<- betareg(prop ~ mass + wingspan + distance + nringed, data=Ex.data, link="logit"))
+
+#checking model fit
+intercept.only.model<- betareg(prop ~ 1, data=Ex.data, link="logit")
+print(deviance<- -2*(logLik(intercept.only.model) - logLik(fitted.model)))
+print(p.value<- pchisq(deviance, df=4, lower.tail=FALSE))
