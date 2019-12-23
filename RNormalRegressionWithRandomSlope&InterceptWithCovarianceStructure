@@ -1,0 +1,66 @@
+install.packages("rcompanion")
+library(rcompanion)
+install.packages("reshape2")
+library(reshape2)
+install.packages("nlme")
+library(nlme)
+
+#read data
+Ex.data<- read.csv(file="path", header=TRUE, sep=",")
+
+#make longform
+data1<- melt(Ex.data[,c("id", "gender", "age", "doctor", "length1", "length2", length3)], id.vars=c("id", "gender", "age", "doctor"), variable.name="length.level", value.name="length")
+data2<- melt(Ex.data[,c("score1", "score2", "score3")], variable.name="score.level", value.name="score")
+lf.data<- cbind(data1, data2)
+
+time<- ifelse(lf.data$length.level=="length1", 1
+ifelse(lf.data$length.level=="length2", 2
+ifelse(lf.data$length.level=="length3", 3, 0)))
+
+#verify normality
+plotNormalHistogram(lf.data$score)
+shapiro.test(lf.data$score)
+
+n<- 105
+p<- 11
+intercept.only.model<- glm(score ~ age + gender + doctor + length + time, data=lf.data)
+
+#fitting unstructured
+summary(fitted.model<- lme(score ~ age + gender + doctor + length + time, random=~1 + year|id, data=lf.data, correlation= corSymm()))
+getVarCov(fitted.model, type="conditional")
+print(AICC<- -2*logLik(fitted.model)+2*p*n/(n-p-1))
+#checking model fit
+print(deviance<- -2*(logLik(intercept.only.model) -logLik(fitted.model)))
+print(p.value<- pchisq(deviance, df=3, lower.tail=FALSE))
+
+#fitting Toeplitz
+summary(fitted.model<- lme(score ~ age + gender + doctor + length + time, random=~1 + year|id, data=lf.data, correlation= corARMA(form=~1|id, p=1, q=1)))
+getVarCov(fitted.model, type="conditional")
+print(AICC<- -2*logLik(fitted.model)+2*p*n/(n-p-1))
+#checking model fit
+print(deviance<- -2*(logLik(intercept.only.model) -logLik(fitted.model)))
+print(p.value<- pchisq(deviance, df=3, lower.tail=FALSE))
+
+#fitting spatial power
+summary(fitted.model<- lme(score ~ age + gender + doctor + length + time, random=~1 + year|id, data=lf.data, correlation= corCAR1(form=~1|id)))
+getVarCov(fitted.model, type="conditional")
+print(AICC<- -2*logLik(fitted.model)+2*p*n/(n-p-1))
+#checking model fit
+print(deviance<- -2*(logLik(intercept.only.model) -logLik(fitted.model)))
+print(p.value<- pchisq(deviance, df=3, lower.tail=FALSE))
+
+#fitting autoregressive
+summary(fitted.model<- lme(score ~ age + gender + doctor + length + time, random=~1 + year|id, data=lf.data, correlation= corAR1(form=~1|id)))
+getVarCov(fitted.model, type="conditional")
+print(AICC<- -2*logLik(fitted.model)+2*p*n/(n-p-1))
+#checking model fit
+print(deviance<- -2*(logLik(intercept.only.model) -logLik(fitted.model)))
+print(p.value<- pchisq(deviance, df=3, lower.tail=FALSE))
+
+#fitting compound symmetric
+summary(fitted.model<- lme(score ~ age + gender + doctor + length + time, random=~1 + year|id, data=lf.data, correlation= corCompSymm(form=~1|id)))
+getVarCov(fitted.model, type="conditional")
+print(AICC<- -2*logLik(fitted.model)+2*p*n/(n-p-1))
+#checking model fit
+print(deviance<- -2*(logLik(intercept.only.model) -logLik(fitted.model)))
+print(p.value<- pchisq(deviance, df=3, lower.tail=FALSE))
