@@ -1,0 +1,15 @@
+install.packages("rcompanion")
+library(rcompanion)
+install.packages("pscl")
+library(pscl)
+
+#read data
+Ex.data<- read.csv(file="path", header=TRUE, sep=",")
+
+#fitting model
+summary(fitted.model<- zeroinfl(nclaimspast ~ age + gender|nclaimsprev, data=Ex.data, dist="negbin"))
+
+#checking model fit
+intercept.only.model<- zeroinfl(nclaimspast ~ 1, data=Ex.data, dist="negbin")
+print(deviance<- -2*(logLik(intercept.only.model) - logLik(fitted.model)))
+print(p.value<- pchisq(deviance, df=4, lower.tail=FALSE))
