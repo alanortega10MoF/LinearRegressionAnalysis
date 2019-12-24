@@ -24,21 +24,21 @@ shapiro.test(lf.data$score)
 summary(null.model<- glm(score ~ API + subject + classsize + year, data=lf.data))
 
 #fitting with two slopes
-summary(null.model<- glmer(score ~ API + subject + classsize + year + (1+year|school) + (1+year|school:subject), data=lf.data))
+summary(fitted.model<- glmer(score ~ API + subject + classsize + year + (1+year|school) + (1+year|school:subject), data=lf.data))
 print(deviance<- -2*(logLik(null.model) - logLik(fitted.model)))
 print(p.value <- pchisq(deviance, df=4, lower.tail=FALSE))
 
 #fitting with one slope
-summary(null.model<- glmer(score ~ API + subject + classsize + year + (1|school) + (1+year|school:subject), data=lf.data))
+summary(fitted.model<- glmer(score ~ API + subject + classsize + year + (1|school) + (1+year|school:subject), data=lf.data))
 print(deviance<- -2*(logLik(null.model) - logLik(fitted.model)))
 print(p.value <- pchisq(deviance, df=3, lower.tail=FALSE))
 
 #fitting with one slope
-summary(null.model<- glmer(score ~ API + subject + classsize + year + (1+year|school) + (1|school:subject), data=lf.data))
+summary(fitted.model<- glmer(score ~ API + subject + classsize + year + (1+year|school) + (1|school:subject), data=lf.data))
 print(deviance<- -2*(logLik(null.model) - logLik(fitted.model)))
 print(p.value <- pchisq(deviance, df=3, lower.tail=FALSE))
 
 #fitting with no slope
-summary(null.model<- glmer(score ~ API + subject + classsize + year + (1|school) + (1|school:subject), data=lf.data))
+summary(fitted.model<- glmer(score ~ API + subject + classsize + year + (1|school) + (1|school:subject), data=lf.data))
 print(deviance<- -2*(logLik(null.model) - logLik(fitted.model)))
 print(p.value <- pchisq(deviance, df=2, lower.tail=FALSE))
