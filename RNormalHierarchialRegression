@@ -1,0 +1,44 @@
+install.packages("rcompanion")
+library(rcompanion)
+install.packages("reshape2")
+library(reshape2)
+install.packages("lme4")
+library(lme4)
+
+#read data
+lf.data<- read.csv(file="path", header=TRUE, sep=",")
+
+#make longform
+#lf.data<- melt(Ex.data[,c("patid", "group", "gender", "EWL1", "EWL2", "EWL3", "EWL4")], id.vars=c("patid", "group", "gender"), variable.name="EWL.level", value.name="EWL")
+
+#time<- ifelse(lf.data$EWL.level=="EWL1", 1,
+#ifelse(lf.data$EWL.level=="EWL2", 2,
+#ifelse(lf.data$EWL.level=="EWL3", 3,
+#ifelse(lf.data$EWL.level=="EWL4", 4, 0))))
+
+#verify normality
+plotNormalHistogram(lf.data$score)
+shapiro.test(lf.data$score)
+
+#fitting null model
+summary(null.model<- glm(score ~ API + subject + classsize + year, data=lf.data))
+
+#fitting with two slopes
+summary(null.model<- glmer(score ~ API + subject + classsize + year + (1+year|school) + (1+year|school:subject), data=lf.data))
+print(deviance<- -2*(logLik(null.model) - logLik(fitted.model)))
+print(p.value <- pchisq(deviance, df=4, lower.tail=FALSE))
+
+#fitting with one slope
+summary(null.model<- glmer(score ~ API + subject + classsize + year + (1|school) + (1+year|school:subject), data=lf.data))
+print(deviance<- -2*(logLik(null.model) - logLik(fitted.model)))
+print(p.value <- pchisq(deviance, df=3, lower.tail=FALSE))
+
+#fitting with one slope
+summary(null.model<- glmer(score ~ API + subject + classsize + year + (1+year|school) + (1|school:subject), data=lf.data))
+print(deviance<- -2*(logLik(null.model) - logLik(fitted.model)))
+print(p.value <- pchisq(deviance, df=3, lower.tail=FALSE))
+
+#fitting with no slope
+summary(null.model<- glmer(score ~ API + subject + classsize + year + (1|school) + (1|school:subject), data=lf.data))
+print(deviance<- -2*(logLik(null.model) - logLik(fitted.model)))
+print(p.value <- pchisq(deviance, df=2, lower.tail=FALSE))
