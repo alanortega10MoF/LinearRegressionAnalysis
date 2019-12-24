@@ -1,0 +1,45 @@
+install.packages("rcompanion")
+library(rcompanion)
+install.packages("reshape2")
+library(reshape2)
+install.packages("lme4")
+library(lme4)
+
+#read data
+Ex.data<- read.csv(file="path", header=TRUE, sep=",")
+
+#make longform
+lf.data<- melt(Ex.data[,c("patid", "group", "gender", "EWL1", "EWL2", "EWL3", "EWL4")], id.vars=c("patid", "group", "gender"), variable.name="EWL.level", value.name="EWL")
+
+time<- ifelse(lf.data$EWL.level=="EWL1", 1,
+ifelse(lf.data$EWL.level=="EWL2", 2,
+ifelse(lf.data$EWL.level=="EWL3", 3,
+ifelse(lf.data$EWL.level=="EWL4", 4, 0))))
+
+#verify normality
+plotNormalHistogram(lf.data$score)
+shapiro.test(lf.data$score)
+
+n<- 64
+p<- 6
+
+#fitting null model
+summary(null.model<- glm(EWL ~ group + gender + time, data=lf.data, family=Gamma(link="log")))
+
+#family= Gamma(link="log")
+#family= poisson(link="log")
+#family= nb(link="log")
+#family= binomial(link="logit")
+#family=beta(link="logit")
+
+#fitting with slope
+summary(fitted.model<- glmer(EWL ~ group + gender + time + (1+time|patid), data=lf.data, family=Gamma(link="log")))
+print(AICC<- -2*logLik(fitted.model)+2*p*n/(n-p-1))
+print(deviance<- -2*(logLik(null.model) - logLik(fitted.model)))
+print(p.value <- pchisq(deviance, df=2, lower.tail=FALSE))
+
+#fitting with no slope
+summary(fitted.model<- glmer(EWL ~ group + gender + time + (1|patid), data=lf.data, family=Gamma(link="log")))
+print(AICC<- -2*logLik(fitted.model)+2*p*n/(n-p-1))
+print(deviance<- -2*(logLik(null.model) - logLik(fitted.model)))
+print(p.value <- pchisq(deviance, df=1, lower.tail=FALSE))
